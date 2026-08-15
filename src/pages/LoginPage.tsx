@@ -3,9 +3,11 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authApi } from '@/apis/authApi';
 import { LoginCredentials } from '@/types';
 import { AxiosError } from 'axios';
+import { useAuthStore } from '@/store/authStore';
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { setAuth } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [location, setLocation] = useState({
@@ -46,6 +48,18 @@ export default function LoginPage() {
           locationLng: response.locationLng,
         }),
       );
+      setAuth(
+        {
+          id: response.userId,
+          name: response.name,
+          hasBall: response.hasBall,
+          locationLat: response.locationLat,
+          locationLng: response.locationLng,
+        },
+        response.token,
+      );
+      console.log(localStorage.getItem('user'));
+      // TODO : 여기에 위치 정보 보내는 API 추가하면 될듯
 
       navigate('/');
     } catch (err: unknown) {
@@ -69,12 +83,12 @@ export default function LoginPage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-200 to-orange-600 px-4">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">🏀 Streetball</h1>
-          <p className="text-primary-100">농구 게임 매칭 플랫폼</p>
+          <p className="text-orange-100">농구 게임 매칭 플랫폼</p>
         </div>
 
         {/* Login Form */}
@@ -83,13 +97,13 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">이메일</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">이름</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 className="input-field"
-                placeholder="your nickname"
+                placeholder="홍길동"
                 required
               />
             </div>
@@ -124,6 +138,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               만들어둔 계정이 없으신가요?{' '}
+
               <Link to="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
                 회원가입
               </Link>

@@ -18,9 +18,6 @@ export const useGameStore = create<GameState>((set) => ({
   addGame: (game) => set((state) => ({ games: [...state.games, game] })),
   updateGame: (id, updates) =>
     set((state) => ({
-      games: state.games.map((game) =>
-        game.id === id ? { ...game, ...updates } : game
-      ),
+      games: state.games.map((game) => (game.gameId === id ? { ...game, ...updates } : game)),
     })),
 }));
-

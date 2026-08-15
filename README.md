@@ -2,52 +2,111 @@
 
 농구 게임 매칭 플랫폼 프론트엔드
 
-## 기술 스택
+> 카카오맵 기반으로 주변 농구장과 게임을 찾고, 쉽게 참여할 수 있는 농구 커뮤니티 플랫폼
+
+## ✨ 기술 스택
 
 - **React 18** + **TypeScript**
 - **Vite** - 빠른 개발 서버 및 빌드 도구
 - **React Router** - 클라이언트 사이드 라우팅
-- **Zustand** - 상태 관리
+- **Zustand** - 클라이언트 상태 관리
+- **TanStack Query (React Query)** - 서버 상태 관리 및 캐싱
 - **Tailwind CSS** - 유틸리티 기반 CSS 프레임워크
 - **Axios** - HTTP 클라이언트
 - **Kakao Map API** - 지도 서비스
 
-## 프로젝트 구조
+## 📁 프로젝트 구조
 
 ```
 src/
-├── apis/          # API 통신 관련 (axios, authApi, gameApi)
-├── components/    # 재사용 가능한 컴포넌트 (Modal, GameModal 등)
-├── hooks/         # 커스텀 훅 (useGeolocation, useKakaoMap)
-├── pages/         # 페이지 컴포넌트 (LoginPage, RegisterPage, MapPage)
-├── routes/        # 라우팅 설정
-├── store/         # Zustand 상태 관리 (authStore, gameStore)
+├── apis/          # API 통신 레이어
+│   ├── axios.ts           # Axios 인스턴스 및 인터셉터 설정
+│   ├── authApi.ts         # 인증 관련 API
+│   ├── gameApi.ts         # 게임 관련 API
+│   └── courtApi.ts        # 농구장 관련 API
+├── components/    # 재사용 가능한 컴포넌트
+│   ├── Modal.tsx          # 기본 모달 컴포넌트
+│   ├── GameModal.tsx      # 게임 상세 모달
+│   ├── CourtGamesModal.tsx # 농구장 게임 리스트 모달
+│   ├── CreateGameModal.tsx # 게임 생성 모달
+│   └── Header.tsx         # 헤더 컴포넌트
+├── hooks/         # 커스텀 훅
+│   ├── useGeolocation.ts  # 위치 정보 훅
+│   ├── useKakaoMap.ts     # 카카오맵 훅
+│   ├── useCourt.ts        # 농구장 데이터 훅
+│   ├── useCourtGames.ts   # 농구장별 게임 조회 (React Query)
+│   └── useGameMutations.ts # 게임 변경 작업 (React Query)
+├── lib/           # 라이브러리 설정
+│   └── queryClient.ts     # React Query 설정 및 쿼리 키
+├── pages/         # 페이지 컴포넌트
+│   ├── LoginPage.tsx      # 로그인 페이지
+│   ├── RegisterPage.tsx   # 회원가입 페이지
+│   ├── MapPage.tsx        # 메인 지도 페이지
+│   └── MyPage.tsx         # 마이 페이지
+├── store/         # Zustand 스토어
+│   ├── authStore.ts       # 인증 상태 관리
+│   ├── gameStore.ts       # 게임 상태 관리
+│   └── courtStore.ts      # 농구장 상태 관리
 ├── styles/        # 전역 스타일
+│   └── index.css          # Tailwind CSS 및 커스텀 스타일
 └── types/         # TypeScript 타입 정의
+    ├── auth.ts            # 인증 관련 타입
+    ├── game.ts            # 게임 관련 타입
+    ├── court.ts           # 농구장 관련 타입
+    └── index.ts           # 공통 타입
 ```
 
-## 주요 기능
+## 🎯 주요 기능
 
-### 1. 인증
-- 로그인 / 회원가입
-- JWT 토큰 기반 인증
-- 자동 로그인 (localStorage)
+### 1. 🔐 인증 시스템
+- **회원가입**: 이름, 비밀번호, 공 보유 여부 등록
+- **로그인**: JWT 토큰 기반 인증
+- **자동 로그인**: localStorage를 통한 세션 유지
+- **보호된 라우트**: 미인증 시 로그인 페이지로 자동 리다이렉트
 
-### 2. 지도
-- Kakao Map API를 사용한 지도 표시
-- 사용자 현재 위치 기반 지도 중심 설정
-- 근처 게임 마커 표시
+### 2. 🗺️ 지도 기반 UI
+- **Kakao Map API** 통합
+- **실시간 위치 추적**: Geolocation API 사용
+- **농구장 마커**: 주황색 핀으로 농구장 위치 표시
+- **인터랙티브 지도**: 마커 클릭으로 상세 정보 확인
+- **기본 위치**: 위치 권한 거부 시 서울 시청 기준
 
-### 3. 게임 관리
-- **게임 생성**: 제목, 설명, 날짜, 시간, 최대 인원 설정
-- **근처 게임 검색**: 반경 5km 내 게임 검색
-- **게임 참여/나가기**: 모집 중인 게임에 참여
-- **실시간 인원 업데이트**: 현재 참여 인원 표시
+### 3. 🏀 게임 관리
+#### 게임 생성
+- 농구장 선택
+- 날짜 및 시간 설정
+- 최대 인원 설정 (2-20명)
+- 생성 즉시 React Query를 통한 자동 갱신
 
-### 4. 위치 기반
-- Geolocation API를 사용한 사용자 위치 추적
-- 서버에 위치 정보 업데이트
-- 위치 권한 거부 시 기본 위치(서울 시청) 사용
+#### 게임 참여
+- **슬라이드 UI**: 게임 리스트 아이템 클릭 시 좌측 슬라이드
+- **역할 선택**: 
+  - 🟠 참가자로 참여
+  - 🔵 심판으로 참여
+- **실시간 업데이트**: 참여 시 인원수 즉시 반영
+- **중복 참여 방지**: 이미 참여한 게임은 슬라이드 불가
+
+#### 게임 삭제
+- 호스트만 삭제 가능
+- 삭제 시 확인 다이얼로그
+- 자동 쿼리 무효화로 즉시 UI 업데이트
+
+### 4. 🎪 농구장별 게임 조회
+- **농구장 마커 클릭**: 해당 농구장의 모든 게임 조회
+- **게임 리스트 모달**: 
+  - 게임 상태 (모집 중/마감)
+  - 현재 인원 / 최대 인원
+  - 예정 시간
+  - 호스트 정보
+  - 참가자 목록
+- **빠른 액션**: 모달에서 바로 게임 생성 가능
+
+### 5. ⚡ React Query 통합
+- **자동 캐싱**: API 응답 캐시로 빠른 로딩
+- **자동 갱신**: mutation 성공 시 관련 쿼리 자동 무효화
+- **낙관적 업데이트**: 사용자 경험 개선
+- **에러 핸들링**: 자동 재시도 및 에러 처리
+- **로딩 상태**: 일관된 로딩 UI
 
 ## 시작하기
 
@@ -59,12 +118,14 @@ npm install
 
 ### 2. 환경 변수 설정
 
-`.env` 파일을 생성하고 다음 내용을 추가:
+프로젝트 루트에 `.env` 파일을 생성하고 다음 내용을 추가:
 
 ```env
-VITE_API_BASE_URL=http://localhost:3000/api
-VITE_KAKAO_APP_KEY=YOUR_KAKAO_MAP_APP_KEY
+VITE_API_BASE_URL=...
+VITE_KAKAO_MAP_API_KEY=YOUR_KAKAO_MAP_API_KEY
 ```
+
+> ⚠️ **주의**: `.env` 파일은 `.gitignore`에 포함되어 있습니다. 각자의 환경에서 설정해주세요.
 
 ### 3. 개발 서버 실행
 
@@ -84,23 +145,33 @@ npm run build
 npm run preview
 ```
 
-## API 엔드포인트
+## 📡 API 엔드포인트
 
-### 인증
-- `POST /api/auth/login` - 로그인
-- `POST /api/auth/register` - 회원가입
-- `POST /api/auth/logout` - 로그아웃
-- `PUT /api/auth/location` - 사용자 위치 업데이트
+### 🔐 인증 (Auth)
+| Method | Endpoint | 설명 |
+|--------|----------|------|
+| `POST` | `/users/login` | 로그인 |
+| `POST` | `/users/signup` | 회원가입 |
 
-### 게임
-- `GET /api/games/nearby` - 근처 게임 검색
-- `POST /api/games` - 게임 생성
-- `GET /api/games/:id` - 게임 상세 조회
-- `POST /api/games/:id/join` - 게임 참여
-- `POST /api/games/:id/leave` - 게임 나가기
-- `DELETE /api/games/:id` - 게임 삭제
+### 🏀 게임 (Games)
+| Method | Endpoint | 설명 |
+|--------|----------|------|
+| `GET` | `/games/nearby` | 근처 게임 검색 (lat, lng, radius) |
+| `POST` | `/games` | 게임 생성 |
+| `GET` | `/games/:id` | 게임 상세 조회 |
+| `POST` | `/games/:id/join` | 게임 참여 (userId, role) |
+| `DELETE` | `/games/:id/leave` | 게임 나가기 (userId) |
+| `DELETE` | `/games/:id` | 게임 삭제 (호스트만) |
+| `GET` | `/users/:userId/games/ongoing` | 진행 중인 게임 조회 |
+| `GET` | `/users/:userId/games/past` | 과거 게임 조회 |
 
-## 개발 가이드
+### 🏟️ 농구장 (Courts)
+| Method | Endpoint | 설명 |
+|--------|----------|------|
+| `GET` | `/courts` | 모든 농구장 조회 |
+| `GET` | `/courts/:courtId/games` | 특정 농구장의 게임 목록 |
+
+## 💻 개발 가이드
 
 ### Path Alias
 `@` 경로는 `src/` 디렉토리를 가리킵니다.
@@ -108,6 +179,36 @@ npm run preview
 ```typescript
 import { User } from '@/types';
 import api from '@/apis/axios';
+import { useAuthStore } from '@/store/authStore';
+```
+
+### React Query 사용법
+
+#### 쿼리 키 정의
+```typescript
+// src/lib/queryClient.ts
+export const queryKeys = {
+  courtGames: (courtId: number) => ['courtGames', courtId] as const,
+  courts: ['courts'] as const,
+  games: ['games'] as const,
+};
+```
+
+#### 데이터 조회
+```typescript
+import { useCourtGames } from '@/hooks/useCourtGames';
+
+const { data, isLoading, error } = useCourtGames(courtId);
+```
+
+#### 데이터 변경
+```typescript
+import { useCreateGame } from '@/hooks/useGameMutations';
+
+const createGameMutation = useCreateGame();
+
+await createGameMutation.mutateAsync(gameData);
+// 성공 시 자동으로 관련 쿼리 무효화 및 재조회
 ```
 
 ### 코드 포맷팅
@@ -120,6 +221,66 @@ npm run format
 npm run lint
 ```
 
-## 라이센스
+## 🚀 배포
 
-MIT
+### Vercel 배포
+```bash
+# Vercel CLI 설치
+npm i -g vercel
+
+# 배포
+vercel
+```
+
+### 환경 변수 설정
+Vercel 대시보드에서 환경 변수 설정:
+- `VITE_API_BASE_URL`
+- `VITE_KAKAO_MAP_API_KEY`
+
+## 🛠️ 트러블슈팅
+
+### Kakao Map이 로드되지 않을 때
+1. `index.html`에 Kakao Map SDK가 정확히 로드되었는지 확인
+2. 환경 변수 `VITE_KAKAO_MAP_API_KEY`가 설정되었는지 확인
+3. 브라우저 콘솔에서 에러 메시지 확인
+
+### React Query 캐시 초기화
+```typescript
+import { queryClient } from '@/lib/queryClient';
+
+// 모든 쿼리 무효화
+queryClient.invalidateQueries();
+
+// 특정 쿼리만 무효화
+queryClient.invalidateQueries({ queryKey: ['courtGames'] });
+```
+
+### Axios 인터셉터 디버깅
+`src/apis/axios.ts`에서 request/response 로그 확인
+
+## 📝 주요 변경 이력
+
+### v2.0.0 (2025-12-02)
+- ✅ React Query 통합으로 서버 상태 관리 개선
+- ✅ 농구장별 게임 조회 기능 추가
+- ✅ 슬라이드 UI로 참가자/심판 역할 선택
+- ✅ 자동 쿼리 무효화로 실시간 업데이트
+- ✅ 중복 참여 방지 로직 추가
+
+### v1.0.0 (2025-12-01)
+- ✅ 기본 인증 시스템
+- ✅ 카카오맵 통합
+- ✅ 게임 생성/참여/삭제 기능
+- ✅ 위치 기반 게임 검색
+
+## 👥 기여하기
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📧 문의
+
+프로젝트 관련 문의사항이 있으시면 이슈를 등록해주세요.

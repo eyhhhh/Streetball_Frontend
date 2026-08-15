@@ -11,11 +11,17 @@ const api = axios.create({
 // 요청 인터셉터
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth-storage');
-    if (token) {
-      const authData = JSON.parse(token);
-      if (authData.state?.token) {
-        config.headers.Authorization = `Bearer ${authData.state.token}`;
+    // 로그인, 회원가입 요청에는 토큰을 추가하지 않음
+    const isAuthEndpoint =
+      config.url?.includes('/users/login') || config.url?.includes('/users/signup');
+
+    if (!isAuthEndpoint) {
+      const token = localStorage.getItem('auth-storage');
+      if (token) {
+        const authData = JSON.parse(token);
+        if (authData.state?.token) {
+          config.headers.Authorization = `Bearer ${authData.state.token}`;
+        }
       }
     }
     return config;
@@ -38,14 +44,20 @@ api.interceptors.response.use(
   (error) => {
     const status = error.response?.status;
 
-    // 401: 인증 실패 - 로그인 페이지가 아닐 때만 리다이렉트
+    // 401: 인증 실패 (토큰 만료 또는 유효하지 않은 토큰)
     if (status === 401) {
       // 현재 경로가 /login이나 /register가 아닐 때만 리다이렉트
       const currentPath = window.location.pathname;
       if (currentPath !== '/login' && currentPath !== '/register') {
+        // 로컬 스토리지 정리
         localStorage.removeItem('auth-storage');
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        
+        // 사용자에게 알림
+        alert('로그인이 만료되었습니다. 다시 로그인해주세요.');
+        
+        // 로그인 페이지로 리다이렉트
         window.location.href = '/login';
       }
     }
