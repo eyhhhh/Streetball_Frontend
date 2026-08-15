@@ -123,11 +123,8 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              계정이 없으신가요?{' '}
-              <Link
-                to="/register"
-                className="text-primary-600 hover:text-primary-700 font-semibold"
-              >
+              만들어둔 계정이 없으신가요?{' '}
+              <Link to="/register" className="text-orange-600 hover:text-orange-700 font-semibold">
                 회원가입
               </Link>
             </p>
